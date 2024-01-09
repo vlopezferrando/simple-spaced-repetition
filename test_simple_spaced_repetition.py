@@ -9,14 +9,15 @@ LEARNING, REVIEWING, RELEARNING = (
     Card.RELEARNING,
 )
 
+
 def check_values(card, attr, again, hard, good, easy):
     assert getattr(card.again(), attr) == again
     assert getattr(card.hard(), attr) == hard
     assert getattr(card.good(), attr) == good
     assert getattr(card.easy(), attr) == easy
 
-class TestSimpleSpacedRepetition(unittest.TestCase):
 
+class TestSimpleSpacedRepetition(unittest.TestCase):
     def test_new_card(self):
         card = Card()
         assert card.status == LEARNING
@@ -32,7 +33,12 @@ class TestSimpleSpacedRepetition(unittest.TestCase):
         check_values(card, "ease", None, None, None, 2.5)
         check_values(card, "interval", None, None, None, 4)
         check_values(
-            card, "due", td(minutes=1), td(minutes=6), td(minutes=10), td(days=4)
+            card,
+            "due",
+            td(minutes=1),
+            td(minutes=6),
+            td(minutes=10),
+            td(days=4),
         )
 
     def test_learning_step_1(self):
@@ -82,5 +88,5 @@ class TestSimpleSpacedRepetition(unittest.TestCase):
         check_values(card, "due", td(minutes=1), td(minutes=6), td(days=1), td(days=4))
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

@@ -25,7 +25,7 @@ setup(
         "Programming Language :: Python :: 3",
     ],
     keywords="spaced repetition, anki",
-    project_urls={  # Optional
+    project_urls={
         "Bug Reports": "https://github.com/vlopezferrando/simple-spaced-repetition/issues",
         "Source": "https://github.com/vlopezferrando/simple-spaced-repetition",
         "Used at": "https://python.cards",
