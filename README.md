@@ -4,7 +4,7 @@ Simple spaced repetition scheduler, based on the [classic Anki algorithm](https:
 
 This scheduler is used at [Python.cards](https://python.cards).
 
-[!Test status](https://github.com/vlopezferrando/simple-spaced-repetition/actions/workflows/python-package.yml/badge.svg)
+![Tests](https://github.com/vlopezferrando/simple-spaced-repetition/actions/workflows/python-package.yml/badge.svg)
 [![Supported Versions](https://img.shields.io/pypi/pyversions/simple_spaced_repetition.svg)](https://pypi.org/project/simple_spaced_repetition)
 
 ## Installation
