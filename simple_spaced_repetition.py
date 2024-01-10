@@ -3,17 +3,25 @@ from datetime import timedelta
 
 class Card:
     # Statuses
-    LEARNING, REVIEWING, RELEARNING = 1, 2, 3
+    LEARNING, REVIEWING, RELEARNING = "learning", "reviewing", "relearning"
 
     # Answers
-    AGAIN, HARD, GOOD, EASY = 1, 2, 3, 4
+    ANSWERS = ["again", "hard", "good", "easy"]
 
-    # Config
-    HARD_INTERVAL = 1.2
+    # Interval multipliers
+    HARD_INTERVAL = 1.2  # Multiplier for hard answers, used insead of ease
     EASY_BONUS = 1.5
+
+    # Ease values
+    INITIAL_EASE = 2.5
     MIN_EASE = 1.3
+    AGAIN_EASE_DELTA = -0.2
+    HARD_EASE_DELTA = -0.15
+    EASY_EASE_DELTA = 0.15
 
     def __init__(self, status=LEARNING, step=0, interval=None, ease=None, due=None):
+        assert step is None or 0 <= step <= 1
+
         self.status = status
         self.step = step
         self.interval = interval
@@ -36,9 +44,7 @@ class Card:
             due=timedelta(days=days),
         )
 
-    def _relearning(self, minutes, step=0, ease=None):
-        if ease is None:
-            ease = self.ease
+    def _relearning(self, minutes, ease, step=0):
         return Card(
             status=self.RELEARNING,
             step=step,
@@ -46,68 +52,48 @@ class Card:
             due=timedelta(minutes=minutes),
         )
 
-    def _learning_options(self):
-        assert self.step is not None
-        assert self.interval is None
-        assert self.ease is None
-        return [
-            self._learning(step=0, minutes=1),
-            self._learning(step=1, minutes=6),
-            self._learning(step=1, minutes=10)
-            if self.step == 0
-            else self._reviewing(days=1, ease=2.5),
-            self._reviewing(days=4, ease=2.5),
-        ]
-
-    def _reviewing_options(self):
-        assert self.step is None
-        assert self.interval is not None
-        assert self.ease is not None
-        return [
-            self._relearning(minutes=10, ease=self.ease - 0.2),
-            self._reviewing(self.interval * self.HARD_INTERVAL, self.ease - 0.15),
-            self._reviewing(self.interval * self.ease, self.ease),
-            self._reviewing(
-                self.interval * self.ease * self.EASY_BONUS, self.ease + 0.15
-            ),
-        ]
-
-    def _relearning_options(self):
-        assert self.step is not None
-        assert self.interval is None
-        assert self.ease is not None
-        return [
-            self._relearning(minutes=1),
-            self._relearning(minutes=6),
-            self._reviewing(days=1, ease=self.ease),
-            self._reviewing(days=4, ease=self.ease),
-        ]
-
     def _options(self):
         if self.status == self.LEARNING:
-            return self._learning_options()
+            return [
+                self._learning(step=0, minutes=1),
+                self._learning(step=1, minutes=6),
+                self._learning(step=1, minutes=10)
+                if self.step == 0
+                else self._reviewing(days=1, ease=self.INITIAL_EASE),
+                self._reviewing(days=4, ease=self.INITIAL_EASE),
+            ]
         elif self.status == self.REVIEWING:
-            return self._reviewing_options()
+            return [
+                self._relearning(minutes=10, ease=self.ease + self.AGAIN_EASE_DELTA),
+                self._reviewing(
+                    days=self.interval * self.HARD_INTERVAL,
+                    ease=self.ease + self.HARD_EASE_DELTA,
+                ),
+                self._reviewing(days=self.interval * self.ease, ease=self.ease),
+                self._reviewing(
+                    days=self.interval * self.ease * self.EASY_BONUS,
+                    ease=self.ease + self.EASY_EASE_DELTA,
+                ),
+            ]
         elif self.status == self.RELEARNING:
-            return self._relearning_options()
-        assert False
+            return [
+                self._relearning(minutes=1, ease=self.ease),
+                self._relearning(minutes=6, ease=self.ease),
+                self._reviewing(days=1, ease=self.ease),
+                self._reviewing(days=4, ease=self.ease),
+            ]
 
-    def _answer(self, answer):
-        return self._options()[answer - 1]
+    def __repr__(self):
+        return (
+            f"Card(status={self.status}, step={self.step}, "
+            f"interval={self.interval}, ease={self.ease}, due={self.due})"
+        )
 
     # Public methods
 
     def due_times(self):
-        return [o.due for o in self._options()]
+        return dict(zip(self.ANSWERS, [o.due for o in self._options()]))
 
-    def again(self):
-        return self._answer(self.AGAIN)
-
-    def hard(self):
-        return self._answer(self.HARD)
-
-    def good(self):
-        return self._answer(self.GOOD)
-
-    def easy(self):
-        return self._answer(self.EASY)
+    def answer(self, answer):
+        assert answer in self.ANSWERS, f"Invalid answer: {answer}"
+        return self._options()[self.ANSWERS.index(answer)]

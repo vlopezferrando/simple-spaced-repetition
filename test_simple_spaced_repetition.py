@@ -11,10 +11,11 @@ LEARNING, REVIEWING, RELEARNING = (
 
 
 def check_values(card, attr, again, hard, good, easy):
-    assert getattr(card.again(), attr) == again
-    assert getattr(card.hard(), attr) == hard
-    assert getattr(card.good(), attr) == good
-    assert getattr(card.easy(), attr) == easy
+    op_again, op_hard, op_good, op_easy = card._options()
+    assert getattr(op_again, attr) == again
+    assert getattr(op_hard, attr) == hard
+    assert getattr(op_good, attr) == good
+    assert getattr(op_easy, attr) == easy
 
 
 class TestSimpleSpacedRepetition(unittest.TestCase):
@@ -45,7 +46,7 @@ class TestSimpleSpacedRepetition(unittest.TestCase):
         card = Card(step=1)
         check_values(card, "status", LEARNING, LEARNING, REVIEWING, REVIEWING)
         check_values(card, "step", 0, 1, None, None)
-        check_values(card, "ease", None, None, 2.5, 2.5)
+        check_values(card, "ease", None, None, Card.INITIAL_EASE, Card.INITIAL_EASE)
         check_values(card, "interval", None, None, 1, 4)
         check_values(card, "due", td(minutes=1), td(minutes=6), td(days=1), td(days=4))
 
@@ -56,10 +57,10 @@ class TestSimpleSpacedRepetition(unittest.TestCase):
         check_values(
             card,
             "ease",
-            max(Card.MIN_EASE, ease - 0.2),
-            max(Card.MIN_EASE, ease - 0.15),
+            max(Card.MIN_EASE, ease + Card.AGAIN_EASE_DELTA),
+            max(Card.MIN_EASE, ease + Card.HARD_EASE_DELTA),
             ease,
-            ease + 0.15,
+            ease + Card.EASY_EASE_DELTA,
         )
         hard_ivl = interval * Card.HARD_INTERVAL
         good_ivl = interval * ease
