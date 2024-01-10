@@ -7,7 +7,7 @@ long_description = Path(__file__).with_name("README.md").read_text(encoding="utf
 setup(
     name="simple_spaced_repetition",
     py_modules=["simple_spaced_repetition"],
-    version="0.1.0",
+    version="0.2.0",
     description="Simple spaced repetition library",
     long_description=long_description,
     long_description_content_type="text/markdown",
