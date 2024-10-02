@@ -98,6 +98,17 @@ class TestSimpleSpacedRepetition(unittest.TestCase):
         check_values(card, "ease", 3.0, 3.0, 3.0, 3.0)
         check_values(card, "interval", _minutes(1), _minutes(6), _days(1), _days(4))
 
+    def test_serialize(self):
+        card = Card(status=RELEARNING, ease=3.0, step=0, interval=_days(1))
+        card_dict = card.to_dict()
+        assert card_dict["status"] == RELEARNING
+        assert card_dict["interval"] == 86400.0
+        assert card_dict["ease"] == 3.0
+        assert card_dict["step"] == 0
+
+        card2 = Card.from_dict(card_dict)
+        assert card2.to_dict() == card_dict
+        assert card2.interval == _days(1)
 
 if __name__ == "__main__":
     unittest.main()

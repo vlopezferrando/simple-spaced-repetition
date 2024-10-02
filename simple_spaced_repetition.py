@@ -34,3 +34,20 @@ class Card:
                 Card("reviewing", td(days=4), self.ease),
             ]
         return list(zip(["again", "hard", "good", "easy"], options))
+
+    def to_dict(self):
+        return {
+            "status": self.status,
+            "step": self.step,
+            "interval": self.interval.total_seconds() if self.interval else None,
+            "ease": self.ease,
+        }
+        
+    @classmethod
+    def from_dict(cls, card_dict):
+        return cls(
+            status=card_dict["status"],
+            interval=td(seconds=card_dict["interval"]) if card_dict["interval"] else None,
+            ease=card_dict["ease"],
+            step=card_dict["step"],
+        )
